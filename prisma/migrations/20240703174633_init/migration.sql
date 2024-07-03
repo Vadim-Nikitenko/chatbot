@@ -95,11 +95,8 @@ CREATE TABLE "OrderItem" (
 CREATE TABLE "Address" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
-    "street" TEXT NOT NULL,
     "city" TEXT NOT NULL,
-    "state" TEXT NOT NULL,
-    "zip_code" TEXT NOT NULL,
-    "country" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
 
     CONSTRAINT "Address_pkey" PRIMARY KEY ("id")
 );
@@ -150,6 +147,9 @@ CREATE TABLE "CartItem" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_tgUsername_key" ON "User"("tgUsername");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Address_user_id_key" ON "Address"("user_id");
 
 -- AddForeignKey
 ALTER TABLE "Pizza" ADD CONSTRAINT "Pizza_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;

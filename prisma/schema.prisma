@@ -8,11 +8,11 @@ generator client {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   name       String
-  tgUsername String    @unique
+  tgUsername String   @unique
   orders     Order[]
-  addresses  Address[]
+  address    Address?
   carts      Cart[]
 }
 
@@ -95,13 +95,10 @@ model OrderItem {
 
 model Address {
   id       Int        @id @default(autoincrement())
-  user_id  Int
+  user_id  Int        @unique
   user     User       @relation(fields: [user_id], references: [id])
-  street   String
   city     String
-  state    String
-  zip_code String
-  country  String
+  address  String
   Delivery Delivery[]
 }
 

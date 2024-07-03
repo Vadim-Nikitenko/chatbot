@@ -5,3 +5,5 @@ pgdata
 docker-compose.yml
 .idea
 dist
+/.clinic
+session.json
