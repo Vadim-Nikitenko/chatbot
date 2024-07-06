@@ -1,0 +1,167 @@
+datasource db {
+  provider = "postgresql" // or any other provider
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  name       String
+  tgUsername String   @unique
+  orders     Order[]
+  address    Address?
+  carts      Cart[]
+}
+
+model PizzaSize {
+  size_id     Int           @id @default(autoincrement())
+  size_name   String
+  price       Float
+  PizzaOption PizzaOption[]
+}
+
+// Define additional ingredients and their price adjustments
+model PizzaIngredient {
+  ingredient_id    Int           @id @default(autoincrement())
+  ingredient_name  String
+  price_adjustment Float
+  PizzaOption      PizzaOption[]
+}
+
+// Define the types of pizzas with their base prices
+model Pizza {
+  pizza_id    Int           @id @default(autoincrement())
+  pizza_name  String
+  base_price  Float
+  PizzaOption PizzaOption[]
+  Category    Category?     @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
+}
+
+// Define the relationships between pizzas, sizes, and ingredients
+model PizzaOption {
+  option_id  Int              @id @default(autoincrement())
+  pizza      Pizza            @relation(fields: [pizza_id], references: [pizza_id])
+  size       PizzaSize?       @relation(fields: [size_id], references: [size_id])
+  ingredient PizzaIngredient? @relation(fields: [ingredient_id], references: [ingredient_id])
+
+  // Foreign keys
+  pizza_id      Int
+  size_id       Int?
+  ingredient_id Int?
+  OrderItem     OrderItem[]
+  CartItem      CartItem[]
+}
+
+model Category {
+  id       Int     @id @default(autoincrement())
+  name     String
+  products Pizza[]
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  user_id     Int
+  user        User        @relation(fields: [user_id], references: [id])
+  status      OrderStatus
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  order_items OrderItem[]
+  payments    Payment[]
+  deliveries  Delivery[]
+}
+
+enum OrderStatus {
+  pending
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+model OrderItem {
+  id                   Int         @id @default(autoincrement())
+  order_id             Int
+  order                Order       @relation(fields: [order_id], references: [id])
+  product_id           Int
+  pizza                PizzaOption @relation(fields: [pizzaOptionOption_id], references: [option_id])
+  quantity             Int
+  basePrice            Float
+  pizzaOptionOption_id Int
+}
+
+model Address {
+  id       Int        @id @default(autoincrement())
+  user_id  Int        @unique
+  user     User       @relation(fields: [user_id], references: [id])
+  city     String
+  address  String
+  Delivery Delivery[]
+}
+
+model Payment {
+  id       Int           @id @default(autoincrement())
+  order_id Int
+  order    Order         @relation(fields: [order_id], references: [id])
+  method   PaymentMethod
+  status   PaymentStatus
+  amount   Float
+}
+
+enum PaymentMethod {
+  credit_card
+  paypal
+  bank_transfer
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+}
+
+model Delivery {
+  id            Int            @id @default(autoincrement())
+  order_id      Int
+  order         Order          @relation(fields: [order_id], references: [id])
+  address_id    Int
+  address       Address        @relation(fields: [address_id], references: [id])
+  status        DeliveryStatus
+  dispatched_at DateTime?
+  delivered_at  DateTime?
+}
+
+enum DeliveryStatus {
+  pending
+  dispatched
+  delivered
+  cancelled
+}
+
+enum Size {
+  small
+  medium
+  large
+}
+
+model Cart {
+  id         Int        @id @default(autoincrement())
+  user_id    Int
+  user       User       @relation(fields: [user_id], references: [id])
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  cart_items CartItem[]
+}
+
+model CartItem {
+  id                   Int         @id @default(autoincrement())
+  cart_id              Int
+  cart                 Cart        @relation(fields: [cart_id], references: [id])
+  product_id           Int
+  pizza                PizzaOption @relation(fields: [pizzaOptionOption_id], references: [option_id])
+  quantity             Int
+  pizzaOptionOption_id Int
+}
